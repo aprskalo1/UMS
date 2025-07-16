@@ -1,0 +1,38 @@
+# Byte‑compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE/project files
+.idea/
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Audio data (large media files)
+audio/
+
+# FAISS build/artifacts
+faiss/build/
+faiss/dist/
+faiss/*.so
+faiss/*.dylib
+faiss/*.dll
+faiss/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# macOS / Windows clutter
+.DS_Store
+Thumbs.db
