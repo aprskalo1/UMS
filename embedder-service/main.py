@@ -1,10 +1,14 @@
 ﻿import os
 import time
-from config import AUDIO_PATH
+from config import AUDIO_PATH, MAPPING_PATH
 from loader import load_and_preprocess
+from mapping_store import CSVMappingStore
 from model import get_embedding
 from faiss_index import load_index, add_to_index, save_index
 from logger import logger
+
+mapper = CSVMappingStore(MAPPING_PATH)
+mapper.initialize()
 
 def embed_all_audio():
     overall_start = time.time()
@@ -20,6 +24,8 @@ def embed_all_audio():
             waveform = load_and_preprocess(path)
             vec = get_embedding(waveform)
             add_to_index(index, vec)
+            new_id = index.ntotal - 1
+            mapper.add(new_id, fname)
             processed += 1
             logger.info(f"Completed pipeline for {fname}")
         except Exception:
