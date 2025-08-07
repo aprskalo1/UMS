@@ -18,6 +18,7 @@ model = AutoModel.from_pretrained(
 ).to(device)
 model.eval()
 
+
 def get_embedding(waveform: torch.Tensor) -> np.ndarray:
     start = time.time()
     try:

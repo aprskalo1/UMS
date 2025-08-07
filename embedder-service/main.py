@@ -10,6 +10,7 @@ from logger import logger
 mapper = CSVMappingStore(MAPPING_PATH)
 mapper.initialize()
 
+
 def embed_all_audio():
     overall_start = time.time()
     index = load_index()
@@ -35,6 +36,7 @@ def embed_all_audio():
     save_index(index)
     total_duration = time.time() - overall_start
     logger.info(f"Embedded {processed} files in {total_duration:.3f}s total.")
+
 
 if __name__ == '__main__':
     embed_all_audio()

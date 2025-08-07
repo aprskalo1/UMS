@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Dict
 
+
 class MappingStore(ABC):
     @abstractmethod
     def initialize(self) -> None:

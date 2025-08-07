@@ -3,6 +3,7 @@ from config import TARGET_SAMPLING_RATE
 from logger import logger
 import time
 
+
 def load_and_preprocess(path):
     start = time.time()
     try:
