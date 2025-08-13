@@ -10,7 +10,7 @@ def load_mapping(path):
     with open(path, newline='', encoding='utf-8') as f:
         for row in csv.DictReader(f):
             try:
-                m[int(row['faiss_id'])] = row['filename']
+                m[int(row['faiss_id'])] = row['db_id']
             except:
                 pass
     return m
