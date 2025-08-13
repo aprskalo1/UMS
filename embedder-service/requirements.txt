@@ -1,0 +1,24 @@
+﻿# Core
+numpy~=2.0.2
+torch~=2.7.1+cu128
+torchaudio~=2.7.1
+
+# Audio processing
+noisereduce~=3.0.3
+
+# Transformers (Hugging Face)
+transformers~=4.53.2
+
+# Vector search (CPU build by default; switch to faiss-gpu if you have CUDA)
+faiss-cpu~=1.11.0
+
+# --- Optional helpers (uncomment if needed) ---
+# accelerate   # Speeds up Transformers on some setups
+# librosa      # noisereduce pulls this in, but you can pin it if you like
+# scipy        # same as above
+
+# --- Database support ---
+pyodbc~=5.2.0
+
+# --- Web scraping ---
+yt-dlp~=2025.8.11
