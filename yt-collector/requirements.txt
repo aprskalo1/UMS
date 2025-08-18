@@ -1,0 +1,9 @@
+﻿google-api-python-client==2.141.0
+google-auth==2.35.0
+SQLAlchemy==2.0.34
+pyodbc==5.2.0
+tenacity==9.0.0
+PyYAML==6.0.2
+python-dateutil==2.9.0.post0
+langdetect==1.0.9
+pydantic~=2.11.7

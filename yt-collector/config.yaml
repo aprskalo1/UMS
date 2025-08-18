@@ -1,0 +1,19 @@
+﻿country_scenes:
+  IT:
+    - name: trap
+      keywords: [ "trap", "trappo", "italian trap", "drill italia" ]
+      negative_keywords: [ "sped up", "slowed", "nightcore", "8d" ]
+      daily_admit_cap: 200
+  RS:
+    - name: trap
+      keywords: [ "trap", "balkan trap", "srpski trap" ]
+      negative_keywords: [ "sped up", "slowed", "nightcore", "8d" ]
+      daily_admit_cap: 200
+
+global:
+  duration_min_sec: 90
+  duration_max_sec: 480
+  allow_categories: [ 10 ]
+  search_max_playlists_per_scene: 40
+  search_results_per_query: 25
+  per_playlist_seed_count: 3
