@@ -4,11 +4,6 @@
       keywords: [ "trap", "trappo", "italian trap", "drill italia" ]
       negative_keywords: [ "sped up", "slowed", "nightcore", "8d" ]
       daily_admit_cap: 200
-  RS:
-    - name: trap
-      keywords: [ "trap", "balkan trap", "srpski trap" ]
-      negative_keywords: [ "sped up", "slowed", "nightcore", "8d" ]
-      daily_admit_cap: 200
 
 global:
   duration_min_sec: 90
