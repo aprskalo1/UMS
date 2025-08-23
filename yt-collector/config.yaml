@@ -5,10 +5,81 @@
       negative_keywords: [ "sped up", "slowed", "nightcore", "8d" ]
       daily_admit_cap: 200
 
+
 global:
-  duration_min_sec: 90
-  duration_max_sec: 480
-  allow_categories: [ 10 ]
   search_max_playlists_per_scene: 40
   search_results_per_query: 25
   per_playlist_seed_count: 3
+  duration_min_sec: 90
+  duration_max_sec: 600
+  allow_categories: [ 10 ]
+
+  filtering:
+    laneA_music:
+      min_sec: 90
+      max_sec: 600
+    laneB_nonmusic:
+      min_sec: 90
+      max_sec: 420
+      require_positive_signals: 2
+      allow_non_music_categories: [ 1, 24, 22, 19 ]
+      allow_if_topic_music: true
+
+    positives:
+      title_tokens:
+        - "official video"
+        - "official audio"
+        - "prod."
+        - "prod by"
+        - "feat."
+        - "ft."
+        - " x "
+        - "remix"
+        - "freestyle"
+        - "visualizer"
+        - "single"
+        - "videoclip"
+        - "videoklip"
+
+    negatives:
+      global:
+        - "sped up"
+        - "slowed"
+        - "nightcore"
+        - "8d"
+        - "lyrics"
+        - "karaoke"
+        - "mix"
+        - "dj set"
+        - "reaction"
+        - "vlog"
+        - "tutorial"
+      kids_gaming:
+        - "minecraft"
+        - "brawl stars"
+        - "roblox"
+        - "fortnite"
+        - "pony"
+        - "cartoon"
+        - "animation"
+        - "equestria"
+        - "mlp"
+      drama_series:
+        - "episode"
+        - "season"
+        - "S01E"
+        - "S1E"
+        - "E01"
+        - "EP "
+        - "part "
+        - "全集"
+        - "第"
+        - "剧情"
+        - "短剧"
+        - "剧"
+
+  playlist_quality:
+    min_music_ratio: 0.30
+    ignore_cooccurrence_below_ratio: 0.30
+    size_penalty_after: 200
+    max_items_scan: 150
