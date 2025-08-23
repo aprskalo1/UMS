@@ -1,7 +1,7 @@
 ﻿import os
 from urllib.parse import quote_plus
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import yaml
 
 
@@ -14,11 +14,14 @@ class SceneConfig(BaseModel):
 
 class GlobalConfig(BaseModel):
     duration_min_sec: int = 90
-    duration_max_sec: int = 480
+    duration_max_sec: int = 600
     allow_categories: List[int] = [10]
     search_max_playlists_per_scene: int = 40
     search_results_per_query: int = 25
     per_playlist_seed_count: int = 3
+    filtering: Dict[str, Any] = {}
+    playlist_quality: Dict[str, Any] = {}
+    crawl_limits: Dict[str, Any] = {}
 
 
 class Settings(BaseModel):
