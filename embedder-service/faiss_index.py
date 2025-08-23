@@ -1,40 +1,37 @@
-﻿import faiss
+﻿import os
+from pathlib import Path
+import faiss
 import numpy as np
-import os
 from config import FAISS_INDEX_PATH, EMBEDDING_DIM
 from logger import logger
-import time
+
+
+def _resolved_index_path() -> str:
+    p = Path(FAISS_INDEX_PATH).resolve()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return str(p)
 
 
 def load_index():
-    if os.path.exists(FAISS_INDEX_PATH):
-        return faiss.read_index(FAISS_INDEX_PATH)
-    return faiss.IndexFlatIP(EMBEDDING_DIM)
+    path = _resolved_index_path()
+    if os.path.exists(path):
+        idx = faiss.read_index(path)
+        logger.info(f"Loaded FAISS index: {path} (ntotal={idx.ntotal})")
+        return idx
+    idx = faiss.IndexFlatIP(EMBEDDING_DIM)
+    logger.info(f"Created new FAISS index in memory (dim={EMBEDDING_DIM}); will save to {path}")
+    return idx
 
 
-def add_to_index(index, embedding):
-    start = time.time()
-    try:
-        norm_val = float(np.linalg.norm(embedding))
-        if norm_val == 0.0:
-            logger.warning("Zero‐norm embedding encountered, skipping normalization.")
-            norm_val = 1.0
-        normed = embedding / norm_val
-        vec = np.expand_dims(normed.astype('float32'), axis=0)
-        index.add(vec)
-        duration = time.time() - start
-        logger.info(f"add_to_index took {duration:.3f}s")
-    except Exception as e:
-        logger.exception(f"Error in add_to_index: {e}")
-        raise
+def add_to_index(index, embedding: np.ndarray):
+    # normalize
+    norm = float(np.linalg.norm(embedding)) or 1.0
+    vec = (embedding / norm).astype("float32")[None, :]
+    index.add(vec)
+    logger.info(f"Index add OK (ntotal={index.ntotal})")
 
 
 def save_index(index):
-    start = time.time()
-    try:
-        faiss.write_index(index, FAISS_INDEX_PATH)
-        duration = time.time() - start
-        logger.info(f"save_index took {duration:.3f}s")
-    except Exception as e:
-        logger.exception(f"Error in save_index: {e}")
-        raise
+    path = _resolved_index_path()
+    faiss.write_index(index, path)
+    logger.info(f"Saved FAISS index -> {path} (ntotal={index.ntotal})")

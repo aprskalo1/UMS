@@ -6,22 +6,48 @@ from config import TARGET_SAMPLING_RATE
 
 
 def resolve_youtube_media(page_url: str) -> Tuple[str, Dict[str, str]]:
-    ydl_opts = {"quiet": True, "noplaylist": True, "skip_download": True, "extract_flat": False}
+    ydl_opts = {
+        "quiet": True,
+        "noplaylist": True,
+        "skip_download": True,
+        "extract_flat": False,
+        "geo_bypass": True,
+        "retries": 2,
+        "socket_timeout": 15,
+        "extractor_args": {"youtube": {"player_client": ["android"]}},
+    }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(page_url, download=False)
 
-    fmts = info.get("formats") or []
-    audio_only = [f for f in fmts if (f.get("vcodec") in (None, "none")) and (f.get("acodec") not in (None, "none"))]
+    def pick_best(formats: list) -> Optional[Dict[str, any]]:
+        if not formats:
+            return None
+        audio_only = [
+            f for f in formats
+            if f.get("url")
+               and (f.get("vcodec") in (None, "none"))
+               and (f.get("acodec") not in (None, "none"))
+        ]
+        candidates = audio_only or [f for f in formats if f.get("url")]
 
-    def score(f):
-        is_progressive = 0 if ("hls" in (f.get("protocol") or "") or f.get("ext") == "m3u8") else 1
-        return is_progressive, f.get("abr") or 0, f.get("asr") or 0
+        def score(f):
+            proto = (f.get("protocol") or "").lower()
+            is_progressive = 0 if ("m3u8" in proto or proto == "http_dash_segments" or f.get("ext") == "m3u8") else 1
+            return is_progressive, f.get("abr") or f.get("tbr") or 0, f.get("asr") or 0
 
-    if audio_only:
-        best = sorted(audio_only, key=score, reverse=True)[0]
-        return best["url"], best.get("http_headers", info.get("http_headers", {}))
+        return max(candidates, key=score) if candidates else None
 
-    return info["url"], info.get("http_headers", {})
+    req = info.get("requested_downloads") or []
+    best = pick_best(req) or pick_best(info.get("formats") or [])
+
+    if best:
+        headers = best.get("http_headers") or info.get("http_headers") or {}
+        return best["url"], headers
+
+    if info.get("url"):
+        return info["url"], info.get("http_headers", {})
+
+    raise RuntimeError("No playable formats with direct URL")
 
 
 def _headers_to_ffmpeg_arg(headers: Dict[str, str]) -> Optional[str]:

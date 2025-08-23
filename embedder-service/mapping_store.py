@@ -43,10 +43,15 @@ class CSVMappingStore(MappingStore):
 
     def load(self) -> Dict[int, str]:
         mapping = {}
+        if not os.path.exists(self.csv_path):
+            return mapping
         with open(self.csv_path, newline="") as f:
             reader = csv.DictReader(f)
+            key_name = "db_id" if "db_id" in reader.fieldnames else ("filename" if "filename" in reader.fieldnames else None)
+            if not key_name:
+                return mapping
             for row in reader:
-                mapping[int(row["faiss_id"])] = row["filename"]
+                mapping[int(row["faiss_id"])] = row[key_name]
         return mapping
 
 

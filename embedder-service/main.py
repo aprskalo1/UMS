@@ -19,6 +19,7 @@ mapper.initialize()
 def embed_from_db_once() -> int:
     start_wall = time.time()
     index = load_index()
+    logger.info(f"Starting embed pass; current index size = {index.ntotal}")
     processed = 0
 
     jobs = fetch_batch_to_process(limit=BATCH_LIMIT)
