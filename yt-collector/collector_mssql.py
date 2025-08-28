@@ -1,8 +1,8 @@
 ﻿from typing import List, Dict, Set
-
+from copy import deepcopy
 from config import Settings
 from dao_mssql import MSSQLDAO
-from filters import iso8601_duration_to_seconds, should_keep_noncat10, should_keep_cat10
+from filters import iso8601_duration_to_seconds, should_keep_noncat10, should_keep_cat10, safe_lang
 from yt_client import YouTubeClient
 
 YOUTUBE_URL = "https://www.youtube.com/watch?v={}"
@@ -17,7 +17,10 @@ class Collector:
     def discover_playlists(self, country: str, scene_cfg) -> List[Dict[str, str]]:
         seen_source: Set[str] = set()
         payloads = []
-        for kw in scene_cfg.keywords:
+
+        queries = getattr(scene_cfg, "playlist_queries", None) or scene_cfg.keywords
+
+        for kw in queries:
             items = self.yt.search_playlists(q=kw, region_code=country,
                                              max_results=self.settings.global_.search_max_playlists_per_scene)
             for it in items:
@@ -51,11 +54,17 @@ class Collector:
         g = self.settings.global_
         laneA = (g.filtering.get("laneA_music") or {})
         laneB = (g.filtering.get("laneB_nonmusic") or {})
+
+        negatives_cfg = deepcopy(g.filtering.get("negatives") or {})
+        scene_negs = set(getattr(scene_cfg, "negative_keywords", []) or [])
+        negatives_cfg.setdefault("global", [])
+        negatives_cfg["global"] = list(set(negatives_cfg["global"]) | scene_negs)
+
         positives_cfg = (g.filtering.get("positives") or {})
-        negatives_cfg = (g.filtering.get("negatives") or {})
         allowed_cat10 = set(g.allow_categories or [10])
         allowed_nonmusic = set(laneB.get("allow_non_music_categories") or [])
         scene_langs = getattr(scene_cfg, "lang_codes", None)
+        chan_whitelist = {c.lower() for c in (getattr(scene_cfg, "channel_name_whitelist", []) or [])}  # NEW
 
         observed = len(items) if max_scan == 0 else min(max_scan, len(items))
         passed = 0
@@ -86,26 +95,39 @@ class Collector:
                 upload_dt = None
             is_live = 1 if (sn.get("liveBroadcastContent") == "live") else 0
             made_for_kids = bool(status.get("madeForKids"))
+            channel_title = (sn.get("channelTitle") or "").strip()  # NEW
+            is_whitelisted_channel = channel_title.lower() in chan_whitelist  # NEW
 
+            # NEW: for cat=10, also require language match unless channel is whitelisted
             keep = (
                     (not made_for_kids)
                     and (0 < dur <= 1800)
                     and (
-                            (cat in allowed_cat10 and should_keep_cat10(
+                            (
+                                    (cat in allowed_cat10)
+                                    and should_keep_cat10(
                                 title=title, dur=dur, is_live=is_live,
                                 min_sec=int(laneA.get("min_sec", g.duration_min_sec)),
                                 max_sec=int(laneA.get("max_sec", g.duration_max_sec)),
                                 negatives_cfg=negatives_cfg
-                            ))
+                            )
+                                    and (
+                                        True if not scene_langs or is_whitelisted_channel
+                                        else (safe_lang(title) in set(scene_langs))
+                                    )
+                            )
                             or
-                            (cat in allowed_nonmusic and should_keep_noncat10(
+                            (
+                                    (cat in allowed_nonmusic)
+                                    and should_keep_noncat10(
                                 title=title, dur=dur, is_live=is_live,
                                 scene_langs=scene_langs,
                                 positives_cfg=positives_cfg,
                                 negatives_cfg=negatives_cfg,
                                 laneB_cfg=laneB,
                                 topic_categories=[]
-                            ))
+                            )
+                            )
                     )
             )
 
@@ -148,7 +170,7 @@ class Collector:
         size_penalty = max(0.0, (len(items) - size_penalty_after) / max(1, len(items))) if len(items) > size_penalty_after else 0.0
         trust_score = max(0.0, music_ratio - size_penalty)
 
-        self.dao.update_playlist_quality(playlist_guid, music_ratio=music_ratio, size=len(items), trust_score=trust_score)
+        self.dao.update_playlist_quality(playlist_guid, music_ratio=music_ratio, trust_score=trust_score)
 
         min_ratio = float(pq.get("ignore_cooccurrence_below_ratio", 0.30))
         if music_ratio >= min_ratio:

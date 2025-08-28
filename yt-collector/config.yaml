@@ -1,10 +1,52 @@
 ﻿country_scenes:
-  IT:
-    - name: trap
-      keywords: [ "trap", "trappo", "italian trap", "drill italia" ]
-      negative_keywords: [ "sped up", "slowed", "nightcore", "8d" ]
-      daily_admit_cap: 200
 
+  RS:
+    - name: trap
+      lang_codes: [ "sr", "hr", "bs", "me" ]
+      keywords:
+        - "balkan trap"
+        - "balkanski trap"
+        - "ex yu trap"
+        - "srpski trap"
+        - "trap srbija"
+        - "trap beograd"
+        - "trap balkanski"
+        - "trap balkans"
+        - "drill srbija"
+        - "prod coby"
+        - "prod popov"
+        - "prod luxoni"
+        - "prod rouzi"
+      playlist_queries:
+        - "balkanski trap"
+        - "ex yu trap"
+        - "srpski trap"
+        - "balkan drill"
+      channel_name_whitelist:
+        - "IDJVideos"
+        - "Bassivity Digital"
+        - "Generacija Zed"
+        - "Imperator"
+      negative_keywords:
+        - "sped up"
+        - "slowed"
+        - "nightcore"
+        - "8d"
+        - "lyrics"
+        - "karaoke"
+        - "type beat"
+        - "instrumental"
+        - "beat"
+        - "mix"
+        - "dj set"
+        - "reaction"
+        - "uživo"
+        - "uzivo"
+        - "live"
+        - "narodna"
+        - "cajke"
+        - "folk"
+      daily_admit_cap: 300
 
 global:
   search_max_playlists_per_scene: 40

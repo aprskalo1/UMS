@@ -29,11 +29,25 @@ def embed_from_db_once() -> int:
         for job in jobs:
             jid = job["id"]
             url = job["source_url"]
-            start_s = job.get("start_s", YT_START_SECONDS)
-            dur_s = job.get("dur_s", YT_CLIP_SECONDS)
-            tmp_wav = None
 
-            logger.info(f"[{jid}] Resolving YouTube: {url}")
+            # compute effective segment
+            db_start = int(job.get("start_s", 0) or 0)
+            db_dur = int(job.get("dur_s", 0) or 0)
+            total = int(job.get("duration_sec") or 0)
+
+            if db_dur > 0:
+                start_s, dur_s = db_start, db_dur
+            elif YT_CLIP_SECONDS > 0:
+                dur_s = YT_CLIP_SECONDS
+                if total and total > dur_s:
+                    start_s = max(0, (total - dur_s) // 2)
+                else:
+                    start_s = YT_START_SECONDS
+            else:
+                start_s, dur_s = 0, 0
+
+            tmp_wav = None
+            logger.info(f"[{jid}] Resolving YouTube: {url} (ss={start_s}, dur={'FULL' if dur_s == 0 else dur_s})")
             try:
                 media_url, headers = resolve_youtube_media(url)
                 tmp_wav = stream_clip_to_temp_wav(media_url, headers, start_s=start_s, dur_s=dur_s)

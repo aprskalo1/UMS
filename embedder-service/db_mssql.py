@@ -14,7 +14,7 @@ def fetch_batch_to_process(limit: int = 16) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     sql = """
     ;WITH cte AS (
-        SELECT TOP (?) id, platform, source_url, start_s, dur_s, status
+        SELECT TOP (?) id, platform, source_url, start_s, dur_s, duration_sec, status
         FROM dbo.Tracks WITH (UPDLOCK, READPAST, ROWLOCK)
         WHERE status='collected' AND platform='youtube'
         ORDER BY collected_at
@@ -26,7 +26,8 @@ def fetch_batch_to_process(limit: int = 16) -> List[Dict[str, Any]]:
        INSERTED.platform,
        INSERTED.source_url,
        COALESCE(INSERTED.start_s, 0) AS start_s,
-       COALESCE(INSERTED.dur_s,   0) AS dur_s;
+       COALESCE(INSERTED.dur_s,   0) AS dur_s,
+       INSERTED.duration_sec;
     """
     with get_conn() as conn:
         cur = conn.cursor()
@@ -38,6 +39,7 @@ def fetch_batch_to_process(limit: int = 16) -> List[Dict[str, Any]]:
                 "source_url": r[2],
                 "start_s": int(r[3]),
                 "dur_s": int(r[4]),
+                "duration_sec": (int(r[5]) if r[5] is not None else None),  # <-- NEW
             })
         conn.commit()
     return rows

@@ -149,7 +149,7 @@ class MSSQLDAO:
         with self.engine.begin() as cx:
             cx.execute(sql, pairs)
 
-    def update_playlist_quality(self, playlist_guid: str, music_ratio: float, size: int, trust_score: float):
+    def update_playlist_quality(self, playlist_guid: str, music_ratio: float, trust_score: float):
         sql = text("""
                    UPDATE dbo.Playlists
                    SET coherence       = :music_ratio,

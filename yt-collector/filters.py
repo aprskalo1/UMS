@@ -9,8 +9,8 @@ DetectorFactory.seed = 0  # deterministic
 def iso8601_duration_to_seconds(iso: str) -> int:
     m = re.match(r"^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$", iso or "")
     if not m: return 0
-    h = int(m.group(1) or 0);
-    mn = int(m.group(2) or 0);
+    h = int(m.group(1) or 0)
+    mn = int(m.group(2) or 0)
     s = int(m.group(3) or 0)
     return h * 3600 + mn * 60 + s
 
